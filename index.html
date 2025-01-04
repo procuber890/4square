@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D Four Square Game</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+    }
+    canvas {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/110/three.min.js"></script>
+  <script>
+    // Set up the scene, camera, and renderer
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    // Create the plane (court)
+    const planeGeometry = new THREE.PlaneGeometry(10, 10);
+    const planeMaterial = new THREE.MeshBasicMaterial({ color: 0x007700, side: THREE.DoubleSide });
+    const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+    plane.rotation.x = Math.PI / 2;
+    scene.add(plane);
+
+    // Add the court quadrants (lines)
+    const quadrantLines = new THREE.LineSegments(
+      new THREE.EdgesGeometry(new THREE.PlaneGeometry(10, 10, 2, 2)),
+      new THREE.LineBasicMaterial({ color: 0xffffff })
+    );
+    quadrantLines.rotation.x = Math.PI / 2;
+    scene.add(quadrantLines);
+
+    // Create players (represented as cubes)
+    const playerGeometry = new THREE.BoxGeometry(0.5, 1, 0.5);
+    const playerMaterial = new THREE.MeshBasicMaterial({ color: 0x0000ff });
+    const players = [];
+    for (let i = 0; i < 4; i++) {
+      const player = new THREE.Mesh(playerGeometry, playerMaterial);
+      player.position.set(i < 2 ? -2.5 + 5 * (i % 2) : 2.5 - 5 * (i % 2), 0.5, i < 2 ? -2.5 : 2.5);
+      players.push(player);
+      scene.add(player);
+    }
+
+    // Create the ball
+    const ballGeometry = new THREE.SphereGeometry(0.3, 16, 16);
+    const ballMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+    const ball = new THREE.Mesh(ballGeometry, ballMaterial);
+    ball.position.set(0, 0.3, 0);
+    scene.add(ball);
+
+    // Lighting
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+    scene.add(ambientLight);
+
+    // Camera position
+    camera.position.set(0, 10, 10);
+    camera.lookAt(0, 0, 0);
+
+    // Ball movement simulation
+    let ballVelocity = { x: 0.1, z: 0.1 };
+    function moveBall() {
+      ball.position.x += ballVelocity.x;
+      ball.position.z += ballVelocity.z;
+
+      // Bounce off court edges
+      if (Math.abs(ball.position.x) > 5) ballVelocity.x *= -1;
+      if (Math.abs(ball.position.z) > 5) ballVelocity.z *= -1;
+    }
+
+    // Animation loop
+    function animate() {
+      requestAnimationFrame(animate);
+      moveBall();
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    // Handling player controls with the keyboard
+    window.addEventListener("keydown", (event) => {
+      if (event.key === "w") players[0].position.z -= 0.2; // Player 1 up
+      if (event.key === "s") players[0].position.z += 0.2; // Player 1 down
+      if (event.key === "a") players[0].position.x -= 0.2; // Player 1 left
+      if (event.key === "d") players[0].position.x += 0.2; // Player 1 right
+
+      if (event.key === "ArrowUp") players[1].position.z -= 0.2; // Player 2 up
+      if (event.key === "ArrowDown") players[1].position.z += 0.2; // Player 2 down
+      if (event.key === "ArrowLeft") players[1].position.x -= 0.2; // Player 2 left
+      if (event.key === "ArrowRight") players[1].position.x += 0.2; // Player 2 right
+
+      if (event.key === "i") players[2].position.z -= 0.2; // Player 3 up
+      if (event.key === "k") players[2].position.z += 0.2; // Player 3 down
+      if (event.key === "j") players[2].position.x -= 0.2; // Player 3 left
+      if (event.key === "l") players[2].position.x += 0.2; // Player 3 right
+
+      if (event.key === "ArrowUp") players[3].position.z -= 0.2; // Player 4 up
+      if (event.key === "ArrowDown") players[3].position.z += 0.2; // Player 4 down
+      if (event.key === "ArrowLeft") players[3].position.x -= 0.2; // Player 4 left
+      if (event.key === "ArrowRight") players[3].position.x += 0.2; // Player 4 right
+    }
+  </script>
+</body>
+</html>
